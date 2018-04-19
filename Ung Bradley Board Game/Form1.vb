@@ -7,16 +7,37 @@
     Dim shipRotated As Boolean = False
     Dim ableToPlaceShip As Boolean = False
     Dim shipLengthToPlace As Integer = 5
-    Dim filledCells() As Integer
-    Dim shipCellIndex() As Integer
+    Dim shipCellIndex(9) As Integer
     Dim validPlacement As Boolean = False
-    Dim grid(63) As Label
+    Dim grid(7, 7) As Label
 
-    Private Sub fillCells(ByVal x As Integer, y As Integer)
+    Private Function selectedCells(x As Integer, y As Integer) As Label()
+        Dim returnedCells(shipLengthToPlace - 1) As Label
 
+        If shipRotated Then
 
+        Else
 
-    End Sub
+            For k As Integer = x To x + shipLengthToPlace
+                Dim selectedCellIndex As Integer
+
+                Integer.TryParse(grid(k, y).Tag, selectedCellIndex)
+
+                If k > 7 Then
+                    validPlacement = False
+                    Exit For
+                ElseIf shipCellIndex.Contains(selectedcellIndex) Then
+                    validPlacement = False
+                Else
+
+                    returnedCells(k - x) = grid(k, y)
+                    MessageBox.Show(returnedCells(k - x).Name)
+                End If
+            Next
+        End If
+
+        Return returnedCells
+    End Function
 
     Private Sub gameForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         placePhase = True
@@ -27,14 +48,14 @@
                 Dim cellIndex As Integer = k * 8 + i
 
                 Dim cellBase As New Label
-                cellBase.Name = "cell" + (cellIndex + 1).ToString
+                cellBase.Name = "cell" & cellIndex.ToString
                 cellBase.BorderStyle = BorderStyle.FixedSingle
                 cellBase.Location = New Point(30 + 28 * i, 30 + 28 * k)
                 cellBase.Size = New Size(30, 30)
                 cellBase.Tag = cellIndex
                 Me.Controls.Add(cellBase)
 
-                grid(cellIndex) = cellBase
+                grid(k, i) = cellBase
             Next
         Next
 
@@ -53,35 +74,15 @@
 
     Private Sub cell_MouseEnter(sender As Object, e As EventArgs)
         Dim cell = DirectCast(sender, Label)
-        Dim cellNum As Integer
-        Integer.TryParse(cell.Tag, cellNum)
-        Dim row As Integer = (cellNum / 8) - 1
-        Dim column As Integer = cellNum Mod 8
-        MessageBox.Show(column.ToString + " " + row.ToString)
-        fillCells(column, row)
+        Dim cellNum As Integer = cell.Tag
 
-        If shipRotated Then
+        'Gets x and y coords for the mouseover-ed cell
+        Dim yPos As Integer = cellNum Mod 8
+        Dim xPos As Integer = (cellNum - yPos + 1) / 8
 
-        Else
-
-            For k As Integer = column To column + shipLengthToPlace
-
-                Dim cellIndex As Integer = row * 8 + k
-
-                If k > 7 Then
-                    validPlacement = False
-                    Exit For
-                Else
-
-                    If shipCellIndex.Contains(cellIndex) Then
-                        validPlacement = False
-                    Else
-
-                        grid(cellIndex).BackColor = Color.DarkGray
-                    End If
-                End If
-            Next
-        End If
+        For Each cellToFill As Label In selectedCells(xPos, yPos)
+            cellToFill.BackColor = Color.DarkGray
+        Next
     End Sub
 
     Private Sub cell_MouseClick(sender As Object, e As EventArgs)
