@@ -1,7 +1,5 @@
 ﻿Public Class gameForm
 
-
-
     'Global variables for the initial ship placing phase
     Dim placePhase As Boolean = False
     Dim shipRotated As Boolean = False
@@ -11,31 +9,36 @@
     Dim validPlacement As Boolean = False
     Dim grid(7, 7) As Label
 
-    Private Function selectedCells(x As Integer, y As Integer) As Label()
-        Dim returnedCells(shipLengthToPlace - 1) As Label
+    Private Function selectedCells(x As Integer, y As Integer) As Integer()
+        Dim returnedCells(shipLengthToPlace - 1, 2)
+
 
         If shipRotated Then
 
         Else
 
-            For k As Integer = x To x + shipLengthToPlace
+            For k As Integer = 0 To shipLengthToPlace - 1
+
                 Dim selectedCellIndex As Integer
 
                 Integer.TryParse(grid(k, y).Tag, selectedCellIndex)
 
-                If k > 7 Then
+                If selectfdasfds Then
                     validPlacement = False
                     Exit For
-                ElseIf shipCellIndex.Contains(selectedcellIndex) Then
+                ElseIf shipCellIndex.Contains(selectedCellIndex) Then
                     validPlacement = False
                 Else
 
-                    returnedCells(k - x) = grid(k, y)
-                    MessageBox.Show(returnedCells(k - x).Name)
+                    returnedCells(k
+                    MessageBox.Show(returnedCells(0).Tag)
                 End If
             Next
         End If
 
+        For Each lb As Label In returnedCells
+            MessageBox.Show(lb.Tag)
+        Next
         Return returnedCells
     End Function
 
@@ -45,12 +48,12 @@
         'Generates grid
         For k As Integer = 0 To 7
             For i As Integer = 0 To 7
-                Dim cellIndex As Integer = k * 8 + i
+                Dim cellIndex As Integer = i * 8 + k
 
                 Dim cellBase As New Label
                 cellBase.Name = "cell" & cellIndex.ToString
                 cellBase.BorderStyle = BorderStyle.FixedSingle
-                cellBase.Location = New Point(30 + 28 * i, 30 + 28 * k)
+                cellBase.Location = New Point(30 + 28 * k, 30 + 28 * i)
                 cellBase.Size = New Size(30, 30)
                 cellBase.Tag = cellIndex
                 Me.Controls.Add(cellBase)
@@ -77,11 +80,15 @@
         Dim cellNum As Integer = cell.Tag
 
         'Gets x and y coords for the mouseover-ed cell
-        Dim yPos As Integer = cellNum Mod 8
-        Dim xPos As Integer = (cellNum - yPos + 1) / 8
+        Dim xPos As Integer = cellNum Mod 8
+        Dim yPos As Integer = (cellNum - xPos + 1) / 8
 
-        For Each cellToFill As Label In selectedCells(xPos, yPos)
-            cellToFill.BackColor = Color.DarkGray
+        Dim cellsToFill(shipLengthToPlace - 1) As Label
+        cellsToFill = selectedCells(xPos, yPos)
+        MessageBox.Show(cellsToFill(1).Tag)
+
+        For k As Integer = 0 To cellsToFill.Length - 1
+            MessageBox.Show(cellsToFill(k).Tag)
         Next
     End Sub
 
