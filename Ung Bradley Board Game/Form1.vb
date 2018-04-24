@@ -8,9 +8,17 @@
     Dim shipCellIndex(9) As Integer
     Dim validPlacement As Boolean = False
     Dim grid(7, 7) As Label
+    Dim cellsToFill As Integer(,)
 
-    Private Function selectedCells(x As Integer, y As Integer) As Integer()
-        Dim returnedCells(shipLengthToPlace - 1, 2)
+    Private Function selectedCells(x As Integer, y As Integer) As Integer(,)
+        Dim availibleCells As Integer = 0
+        For k As Integer = 0 To shipLengthToPlace - 1
+            If Not k + x > 7 Then
+                availibleCells += 1
+            End If
+        Next
+        'make array certain length
+        Dim returnedCells(shipLengthToPlace - 1, 1) As Integer
 
 
         If shipRotated Then
@@ -23,22 +31,20 @@
 
                 Integer.TryParse(grid(k, y).Tag, selectedCellIndex)
 
-                If selectfdasfds Then
+                If x + k > 7 Then
                     validPlacement = False
                     Exit For
                 ElseIf shipCellIndex.Contains(selectedCellIndex) Then
                     validPlacement = False
                 Else
 
-                    returnedCells(k
-                    MessageBox.Show(returnedCells(0).Tag)
+                    returnedCells(k, 0) = x + k
+                    returnedCells(k, 1) = y
+
                 End If
             Next
         End If
 
-        For Each lb As Label In returnedCells
-            MessageBox.Show(lb.Tag)
-        Next
         Return returnedCells
     End Function
 
@@ -72,7 +78,9 @@
     Private Sub cell_MouseLeave(sender As Object, e As EventArgs)
         Dim cell = DirectCast(sender, Label)
 
-        'cell.BackColor = Me.BackColor
+        For k As Integer = 0 To shipLengthToPlace - 1
+            grid(cellsToFill(k, 0), cellsToFill(k, 1)).BackColor = Me.BackColor
+        Next
     End Sub
 
     Private Sub cell_MouseEnter(sender As Object, e As EventArgs)
@@ -83,13 +91,16 @@
         Dim xPos As Integer = cellNum Mod 8
         Dim yPos As Integer = (cellNum - xPos + 1) / 8
 
-        Dim cellsToFill(shipLengthToPlace - 1) As Label
         cellsToFill = selectedCells(xPos, yPos)
-        MessageBox.Show(cellsToFill(1).Tag)
+
 
         For k As Integer = 0 To cellsToFill.Length - 1
-            MessageBox.Show(cellsToFill(k).Tag)
+            If cell.Tag = 0 Or Not grid(cellsToFill(k, 0), cellsToFill(k, 1)).Tag = 0 Then
+                grid(cellsToFill(k, 0), cellsToFill(k, 1)).BackColor = Color.DarkBlue
+            End If
         Next
+
+
     End Sub
 
     Private Sub cell_MouseClick(sender As Object, e As EventArgs)
