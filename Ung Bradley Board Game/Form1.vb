@@ -9,17 +9,12 @@
     Dim validPlacement As Boolean = False
     Dim grid(7, 7) As Label
     Dim cellsToFill As Integer(,)
+    Dim availibleCellsIndex As Integer()
 
     Private Function selectedCells(x As Integer, y As Integer) As Integer(,)
-        Dim availibleCells As Integer = 0
-        For k As Integer = 0 To shipLengthToPlace - 1
-            If Not k + x > 7 Then
-                availibleCells += 1
-            End If
-        Next
-        'make array certain length
-        Dim returnedCells(shipLengthToPlace - 1, 1) As Integer
-
+        validPlacement = True
+        availibleCellsIndex = Nothing
+        Dim returnedCells(,) As Integer
 
         If shipRotated Then
 
@@ -28,21 +23,25 @@
             For k As Integer = 0 To shipLengthToPlace - 1
 
                 Dim selectedCellIndex As Integer
-
                 Integer.TryParse(grid(k, y).Tag, selectedCellIndex)
 
-                If x + k > 7 Then
-                    validPlacement = False
-                    Exit For
-                ElseIf shipCellIndex.Contains(selectedCellIndex) Then
-                    validPlacement = False
+                If Not x + k > 7 Or Not shipCellIndex.Contains(selectedCellIndex) Then
+                    availibleCellsIndex(k) = selectedCellIndex
                 Else
-
-                    returnedCells(k, 0) = x + k
-                    returnedCells(k, 1) = y
-
+                    validPlacement = False
                 End If
+
+                '    returnedCells(k, 0) = x + k
+                '    returnedCells(k, 1) = y
+
             Next
+
+            ReDim returnedCells(availibleCellsIndex.Length, 1)
+            For k As Integer = 0 To availibleCellsIndex.Length - 1
+                returnedCells(k, 0) = x + k
+                returnedCells(k, 1) = y
+            Next
+
         End If
 
         Return returnedCells
