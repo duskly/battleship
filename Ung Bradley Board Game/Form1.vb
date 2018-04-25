@@ -12,7 +12,8 @@
     Dim validPlacement As Boolean = False
     Dim cellsToFill As Integer(,)
     Dim availibleCells As Integer = 0
-
+    
+    'Gets the cells to be highlighted or filled with "ships"
     Private Function selectedCells(x As Integer, y As Integer) As Integer(,)
         shipCellIndex(4) = 45
         validPlacement = True
@@ -20,29 +21,9 @@
 
 
         If shipRotated Then
-            For k As Integer = 0 To shipLengthToPlace - 1
-                Dim selectedCellIndex As Integer
-                Try
-                    Integer.TryParse(grid(x, y + k).Tag, selectedCellIndex)
-                Catch ex As Exception
-                    Exit For
-                End Try
-
-                If Not y + k > 7 Or Not shipCellIndex.Contains(selectedCellIndex) Then
-                    availibleCells += 1
-                Else
-                    validPlacement = False
-
-                End If
-            Next
-
-            ReDim returnedCells(availibleCells - 1, 1)
-            For k As Integer = 0 To availibleCells - 1
-                returnedCells(k, 0) = x
-                returnedCells(k, 1) = y + k
-
-            Next
+            'Will add this after I finish modifying x rotation code
         Else
+            'Loop to find number of availible cells so ReDim works
             For k As Integer = 0 To shipLengthToPlace - 1
 
                 Dim selectedCellIndex As Integer
@@ -58,14 +39,13 @@
                 Else
                     availibleCells += 1
                 End If
-
             Next
 
+        'Fill returnedCells with coords of each cell
             ReDim returnedCells(availibleCells - 1, 1)
             For k As Integer = 0 To availibleCells - 1
                 returnedCells(k, 0) = x + k
                 returnedCells(k, 1) = y
-
             Next
         End If
 
@@ -91,7 +71,8 @@
                 grid(k, i) = cellBase
             Next
         Next
-
+        
+        'Adds event for each cell
         For Each lb As Label In grid
             AddHandler lb.MouseEnter, AddressOf cell_MouseEnter
             AddHandler lb.MouseLeave, AddressOf cell_MouseLeave
@@ -101,7 +82,7 @@
 
     Private Sub cell_MouseLeave(sender As Object, e As EventArgs)
         Dim cell = DirectCast(sender, Label)
-
+        'Clear cells once mouse leaves
         For Each lb As Label In grid
             lb.BackColor = Me.BackColor
         Next
@@ -117,7 +98,7 @@
 
         cellsToFill = selectedCells(xPos, yPos)
 
-
+        'Highlights cells
         For k As Integer = 0 To shipLengthToPlace - 1
             If cell.Tag = 0 Or Not grid(cellsToFill(k, 0), cellsToFill(k, 1)).Tag = 0 Then
                 grid(cellsToFill(k, 0), cellsToFill(k, 1)).BackColor = Color.DarkBlue
@@ -130,21 +111,15 @@
     Private Sub cell_MouseClick(sender As Object, e As MouseEventArgs)
         If e.Button = MouseButtons.Left And placePhase Then
             shipLengthToPlace -= 2
-
+            'Add something here to fill cells
             If shipLengthToPlace = 1 Then
                 placePhase = False
             End If
         ElseIf e.Button = MouseButtons.Right And placePhase Then
+            'Rotates ship placement indicator
             shipRotated = Not shipRotated
-            messagebox.show(validPlacement )
         End If
 
 
-    End Sub
-
-    Private Sub gameForm_SpaceKeyPress(sender As Object, e As KeyPressEventArgs) Handles Me.KeyPress
-        If e.KeyChar = " " Then
-            MessageBox.Show("nice")
-        End If
     End Sub
 End Class
