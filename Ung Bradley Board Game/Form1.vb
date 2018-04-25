@@ -1,47 +1,72 @@
 ﻿Public Class gameForm
 
+    'Keeps track of every cell and their properties
+    Dim grid(7, 7) As Label
+
     'Global variables for the initial ship placing phase
-    Dim placePhase As Boolean = False
+    Dim placePhase As Boolean = True
     Dim shipRotated As Boolean = False
     Dim ableToPlaceShip As Boolean = False
     Dim shipLengthToPlace As Integer = 5
     Dim shipCellIndex(9) As Integer
     Dim validPlacement As Boolean = False
-    Dim grid(7, 7) As Label
     Dim cellsToFill As Integer(,)
-    Dim availibleCellsIndex As Integer()
+    Dim availibleCells As Integer = 0
 
     Private Function selectedCells(x As Integer, y As Integer) As Integer(,)
+        shipCellIndex(4) = 45
         validPlacement = True
-        availibleCellsIndex = Nothing
-        Dim returnedCells(,) As Integer
+        Dim returnedCells(0, 0) As Integer
+
 
         If shipRotated Then
+            For k As Integer = 0 To shipLengthToPlace - 1
+                Dim selectedCellIndex As Integer
+                Try
+                    Integer.TryParse(grid(x, y + k).Tag, selectedCellIndex)
+                Catch ex As Exception
+                    Exit For
+                End Try
 
+                If Not y + k > 7 Or Not shipCellIndex.Contains(selectedCellIndex) Then
+                    availibleCells += 1
+                Else
+                    validPlacement = False
+
+                End If
+            Next
+
+            ReDim returnedCells(availibleCells - 1, 1)
+            For k As Integer = 0 To availibleCells - 1
+                returnedCells(k, 0) = x
+                returnedCells(k, 1) = y + k
+
+            Next
         Else
-
             For k As Integer = 0 To shipLengthToPlace - 1
 
                 Dim selectedCellIndex As Integer
-                Integer.TryParse(grid(k, y).Tag, selectedCellIndex)
-
-                If Not x + k > 7 Or Not shipCellIndex.Contains(selectedCellIndex) Then
-                    availibleCellsIndex(k) = selectedCellIndex
-                Else
+                Try
+                    Integer.TryParse(grid(k + x, y).Tag, selectedCellIndex)
+                Catch ex As Exception
                     validPlacement = False
+                    Exit For
+                End Try
+
+                If shipCellIndex.Contains(selectedCellIndex) Then
+                    validPlacement = False
+                Else
+                    availibleCells += 1
                 End If
 
-                '    returnedCells(k, 0) = x + k
-                '    returnedCells(k, 1) = y
-
             Next
 
-            ReDim returnedCells(availibleCellsIndex.Length, 1)
-            For k As Integer = 0 To availibleCellsIndex.Length - 1
+            ReDim returnedCells(availibleCells - 1, 1)
+            For k As Integer = 0 To availibleCells - 1
                 returnedCells(k, 0) = x + k
                 returnedCells(k, 1) = y
-            Next
 
+            Next
         End If
 
         Return returnedCells
@@ -77,8 +102,8 @@
     Private Sub cell_MouseLeave(sender As Object, e As EventArgs)
         Dim cell = DirectCast(sender, Label)
 
-        For k As Integer = 0 To shipLengthToPlace - 1
-            grid(cellsToFill(k, 0), cellsToFill(k, 1)).BackColor = Me.BackColor
+        For Each lb As Label In grid
+            lb.BackColor = Me.BackColor
         Next
     End Sub
 
@@ -93,7 +118,7 @@
         cellsToFill = selectedCells(xPos, yPos)
 
 
-        For k As Integer = 0 To cellsToFill.Length - 1
+        For k As Integer = 0 To shipLengthToPlace - 1
             If cell.Tag = 0 Or Not grid(cellsToFill(k, 0), cellsToFill(k, 1)).Tag = 0 Then
                 grid(cellsToFill(k, 0), cellsToFill(k, 1)).BackColor = Color.DarkBlue
             End If
@@ -102,8 +127,18 @@
 
     End Sub
 
-    Private Sub cell_MouseClick(sender As Object, e As EventArgs)
-        shipLengthToPlace -= 2
+    Private Sub cell_MouseClick(sender As Object, e As MouseEventArgs)
+        If e.Button = MouseButtons.Left And placePhase Then
+            shipLengthToPlace -= 2
+
+            If shipLengthToPlace = 1 Then
+                placePhase = False
+            End If
+        ElseIf e.Button = MouseButtons.Right And placePhase Then
+            shipRotated = Not shipRotated
+            messagebox.show(validPlacement )
+        End If
+
 
     End Sub
 
