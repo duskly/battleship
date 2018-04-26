@@ -22,9 +22,18 @@ Partial Class gameForm
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        Me.Label1 = New System.Windows.Forms.Label()
         Me.exitBtn = New System.Windows.Forms.Button()
+        Me.Label1 = New System.Windows.Forms.Label()
         Me.SuspendLayout()
+        '
+        'exitBtn
+        '
+        Me.exitBtn.Location = New System.Drawing.Point(178, 379)
+        Me.exitBtn.Name = "exitBtn"
+        Me.exitBtn.Size = New System.Drawing.Size(75, 23)
+        Me.exitBtn.TabIndex = 1
+        Me.exitBtn.Text = "Exit"
+        Me.exitBtn.UseVisualStyleBackColor = True
         '
         'Label1
         '
@@ -35,15 +44,6 @@ Partial Class gameForm
         Me.Label1.TabIndex = 0
         Me.Label1.Text = "Label1"
         Me.Label1.Visible = False
-        '
-        'exitBtn
-        '
-        Me.exitBtn.Location = New System.Drawing.Point(178, 379)
-        Me.exitBtn.Name = "exitBtn"
-        Me.exitBtn.Size = New System.Drawing.Size(75, 23)
-        Me.exitBtn.TabIndex = 1
-        Me.exitBtn.Text = "Exit"
-        Me.exitBtn.UseVisualStyleBackColor = True
         '
         'gameForm
         '
@@ -57,7 +57,6 @@ Partial Class gameForm
         Me.ResumeLayout(False)
 
     End Sub
-
-    Friend WithEvents Label1 As Label
     Friend WithEvents exitBtn As Button
+    Friend WithEvents Label1 As Label
 End Class
