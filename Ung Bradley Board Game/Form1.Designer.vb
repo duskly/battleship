@@ -23,7 +23,8 @@ Partial Class gameForm
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.Label1 = New System.Windows.Forms.Label()
-        Me.exitBtn = New System.Windows.Forms.Button()
+        Me.turnLbl = New System.Windows.Forms.Label()
+        Me.boardLbl = New System.Windows.Forms.Label()
         Me.SuspendLayout()
         '
         'Label1
@@ -36,28 +37,36 @@ Partial Class gameForm
         Me.Label1.Text = "Label1"
         Me.Label1.Visible = False
         '
-        'exitBtn
+        'turnLbl
         '
-        Me.exitBtn.Location = New System.Drawing.Point(178, 379)
-        Me.exitBtn.Name = "exitBtn"
-        Me.exitBtn.Size = New System.Drawing.Size(75, 23)
-        Me.exitBtn.TabIndex = 1
-        Me.exitBtn.Text = "Exit"
-        Me.exitBtn.UseVisualStyleBackColor = True
+        Me.turnLbl.Location = New System.Drawing.Point(30, 258)
+        Me.turnLbl.Name = "turnLbl"
+        Me.turnLbl.Size = New System.Drawing.Size(224, 23)
+        Me.turnLbl.TabIndex = 2
+        Me.turnLbl.Text = "Left-click to place ship, right-click to rotate"
+        '
+        'boardLbl
+        '
+        Me.boardLbl.Location = New System.Drawing.Point(27, 7)
+        Me.boardLbl.Name = "boardLbl"
+        Me.boardLbl.Size = New System.Drawing.Size(100, 23)
+        Me.boardLbl.TabIndex = 3
+        Me.boardLbl.Text = "Your board"
         '
         'gameForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(615, 491)
-        Me.Controls.Add(Me.exitBtn)
+        Me.ClientSize = New System.Drawing.Size(300, 310)
+        Me.Controls.Add(Me.boardLbl)
+        Me.Controls.Add(Me.turnLbl)
         Me.Controls.Add(Me.Label1)
         Me.Name = "gameForm"
-        Me.Text = "Battleship"
+        Me.Text = "Fleet Battle"
         Me.ResumeLayout(False)
 
     End Sub
-
     Friend WithEvents Label1 As Label
-    Friend WithEvents exitBtn As Button
+    Friend WithEvents turnLbl As Label
+    Friend WithEvents boardLbl As Label
 End Class

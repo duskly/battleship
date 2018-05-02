@@ -98,12 +98,29 @@
     End Function
 
     Private Sub gameInit()
-        For k As Integer = 0 To 8
+        For k As Integer = 0 To 10
             compShipCells.Add(grid(rand.Next(0, 8), rand.Next(0, 8)))
         Next
 
+        startRound()
+    End Sub
+
+    Private Sub startRound()
         playerTurn = True
         switchBoard()
+
+    End Sub
+
+    Private Sub endSwitch()
+        If shipCellLabels.Count = 0 Then
+            MessageBox.Show("You lose.")
+            MessageBox.Show("Sorry for rushed coding but you have to open the program again to start a new game :/")
+            Application.Exit()
+        ElseIf compShipCells.Count = 0
+            MessageBox.Show("You win!")
+            MessageBox.Show("Sorry for rushed coding but you have to open the program again to start a new game :/")
+            Application.Exit()
+        End If
     End Sub
 
     Private Sub playGame(cell As Label)
@@ -111,20 +128,54 @@
             If compShipCells.Contains(cell) Then
                 compShipsDestroyed.Add(cell)
                 compShipCells.Remove(cell)
+                cell.BackColor = Color.Red
+                MessageBox.Show("You hit!")
+                endSwitch()
             Else
                 compShipsMissed.Add(cell)
+                cell.BackColor = Color.Black
+                MessageBox.Show("You missed.")
             End If
-        End If
+            playerTurn = False
+            switchBoard()
 
-        playerTurn = False
+            shipTurn()
+        End If
     End Sub
 
     Private Sub shipTurn()
+        Dim cell As Label
+        Dim xFired As Integer
+        Dim yFired As Integer
+        Do
+            xFired = rand.Next(0, 8)
+            yFired = rand.Next(0, 8)
+            cell = grid(xFired, yFired)
 
+            If Not playerShipsDestroyed.Contains(cell) And Not playerShipsMissed.Contains(cell) Then
+                If shipCellLabels.Contains(cell) Then
+                    playerShipsDestroyed.Add(cell)
+                    shipCellLabels.Remove(cell)
+                    cell.BackColor = Color.Red
+                    MessageBox.Show("Computer hit!")
+                    endSwitch()
+                Else
+                    playerShipsMissed.Add(cell)
+                    cell.BackColor = Color.Black
+                    MessageBox.Show("Computer miss.")
+                End If
+                Exit Do
+            End If
+        Loop
 
+        startRound()
     End Sub
 
     Private Sub switchBoard()
+        For Each lb As Label In grid
+            lb.BackColor = Me.BackColor
+        Next
+
         If playerTurn = True Then
             turnLbl.Text = "Your turn - click to fire a missle"
             boardLbl.Text = "Enemy board"
@@ -133,7 +184,7 @@
                 lb.BackColor = Color.Red
             Next
             For Each lb As Label In compShipsMissed
-                lb.BackColor = Color.White
+                lb.BackColor = Color.Black
             Next
         Else
             turnLbl.Text = "Enemy turn"
@@ -146,7 +197,7 @@
                 lb.BackColor = Color.Red
             Next
             For Each lb As Label In playerShipsMissed
-                lb.BackColor = Color.White
+                lb.BackColor = Color.Black
             Next
         End If
     End Sub
@@ -176,6 +227,8 @@
             AddHandler lb.MouseLeave, AddressOf cell_MouseLeave
             AddHandler lb.MouseClick, AddressOf cell_MouseClick
         Next
+
+        MessageBox.Show("Welcome to Fleet Battle! I didn't have enough time to make an official instruction page, much less an actual tutorial, so just have this MessageBox explanation." & vbNewLine & "Basically this is like Battleship but the enemy has a bunch of individual small ships that are only 1x1 while you have one 5x1 and two 3x1 ships." & vbNewLine & vbNewLine & "btw this probably has some bugs (i'm aware of the highlighting bug in the ship placement phase), i didn't have enough time to do any animations, and yes, the randomization is really bad (but the spread of enemy ships balances it out so that's cool), so it is what it is :/")
     End Sub
 
     Private Sub cell_MouseLeave(sender As Object, e As EventArgs)
