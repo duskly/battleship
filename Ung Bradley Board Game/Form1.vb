@@ -1,5 +1,6 @@
 ﻿Public Class gameForm
 
+    Dim rand As New Random
     'Keeps track of every cell and their properties
     Dim grid(7, 7) As Label
 
@@ -8,41 +9,62 @@
     Dim shipRotated As Boolean = False
     Dim ableToPlaceShip As Boolean = False
     Dim shipLengthToPlace As Integer = 5
-    Dim shipCellIndex(9) As Integer
+    Dim shipCellIndex As New ArrayList()
+    Dim shipCellLabels As New ArrayList()
+    Dim flagCells As New ArrayList()
     Dim validPlacement As Boolean = False
     Dim cellsToFill As Integer(,)
     Dim availibleCells As Integer = 0
+    Dim justPlaced As Integer = False
 
+    'Gameplay variables
+    Dim playerTurn As Boolean = False
+
+    Dim compShipCells As New ArrayList()
+    Dim compShipsDestroyed As New ArrayList()
+    Dim compShipsMissed As New ArrayList()
+
+    Dim playerShipsDestroyed As New ArrayList()
+    Dim playerShipsMissed As New ArrayList()
+
+    'Gets the cells to be highlighted or filled with "ships"
     Private Function selectedCells(x As Integer, y As Integer) As Integer(,)
-        shipCellIndex(4) = 45
+
+        availibleCells = 0
         validPlacement = True
         Dim returnedCells(0, 0) As Integer
 
 
         If shipRotated Then
             For k As Integer = 0 To shipLengthToPlace - 1
+
                 Dim selectedCellIndex As Integer
                 Try
                     Integer.TryParse(grid(x, y + k).Tag, selectedCellIndex)
                 Catch ex As Exception
+                    validPlacement = False
                     Exit For
                 End Try
 
-                If Not y + k > 7 Or Not shipCellIndex.Contains(selectedCellIndex) Then
-                    availibleCells += 1
-                Else
+                If shipCellIndex.Contains(selectedCellIndex) Then
+                    flagCells.Add(selectedCellIndex)
                     validPlacement = False
-
+                Else
+                    availibleCells += 1
                 End If
+
             Next
 
+            'Fill returnedCells with coords of each cell
             ReDim returnedCells(availibleCells - 1, 1)
             For k As Integer = 0 To availibleCells - 1
-                returnedCells(k, 0) = x
-                returnedCells(k, 1) = y + k
-
+                If Not flagCells.Contains(grid(x, y + k).Tag) Then
+                    returnedCells(k, 0) = x
+                    returnedCells(k, 1) = y + k
+                End If
             Next
         Else
+            'Loop to find number of availible cells so ReDim works
             For k As Integer = 0 To shipLengthToPlace - 1
 
                 Dim selectedCellIndex As Integer
@@ -54,6 +76,7 @@
                 End Try
 
                 If shipCellIndex.Contains(selectedCellIndex) Then
+                    flagCells.Add(selectedCellIndex)
                     validPlacement = False
                 Else
                     availibleCells += 1
@@ -61,17 +84,72 @@
 
             Next
 
+            'Fill returnedCells with coords of each cell
             ReDim returnedCells(availibleCells - 1, 1)
             For k As Integer = 0 To availibleCells - 1
-                returnedCells(k, 0) = x + k
-                returnedCells(k, 1) = y
-
+                If Not flagCells.Contains(grid(x + k, y).Tag) Then
+                    returnedCells(k, 0) = x + k
+                    returnedCells(k, 1) = y
+                End If
             Next
         End If
 
         Return returnedCells
     End Function
 
+    Private Sub gameInit()
+        For k As Integer = 0 To 8
+            compShipCells.Add(grid(rand.Next(0, 8), rand.Next(0, 8)))
+        Next
+
+        playerTurn = True
+        switchBoard()
+    End Sub
+
+    Private Sub playGame(cell As Label)
+        If Not compShipsDestroyed.Contains(cell) And Not compShipsMissed.Contains(cell) Then
+            If compShipCells.Contains(cell) Then
+                compShipsDestroyed.Add(cell)
+                compShipCells.Remove(cell)
+            Else
+                compShipsMissed.Add(cell)
+            End If
+        End If
+
+        playerTurn = False
+    End Sub
+
+    Private Sub shipTurn()
+
+
+    End Sub
+
+    Private Sub switchBoard()
+        If playerTurn = True Then
+            turnLbl.Text = "Your turn - click to fire a missle"
+            boardLbl.Text = "Enemy board"
+
+            For Each lb As Label In compShipsDestroyed
+                lb.BackColor = Color.Red
+            Next
+            For Each lb As Label In compShipsMissed
+                lb.BackColor = Color.White
+            Next
+        Else
+            turnLbl.Text = "Enemy turn"
+            boardLbl.Text = "Your board"
+
+            For Each lb As Label In shipCellLabels
+                lb.BackColor = Color.DarkBlue
+            Next
+            For Each lb As Label In playerShipsDestroyed
+                lb.BackColor = Color.Red
+            Next
+            For Each lb As Label In playerShipsMissed
+                lb.BackColor = Color.White
+            Next
+        End If
+    End Sub
     Private Sub gameForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         placePhase = True
 
@@ -92,6 +170,7 @@
             Next
         Next
 
+        'Adds event for each cell
         For Each lb As Label In grid
             AddHandler lb.MouseEnter, AddressOf cell_MouseEnter
             AddHandler lb.MouseLeave, AddressOf cell_MouseLeave
@@ -102,49 +181,77 @@
     Private Sub cell_MouseLeave(sender As Object, e As EventArgs)
         Dim cell = DirectCast(sender, Label)
 
-        For Each lb As Label In grid
-            lb.BackColor = Me.BackColor
-        Next
+        If placePhase Then
+            'Clear cells once mouse leaves
+            Try
+                For k As Integer = 0 To shipLengthToPlace - 1
+                    If cell.Tag = 0 Or Not grid(cellsToFill(k, 0), cellsToFill(k, 1)).Tag = 0 And Not shipCellIndex.Contains(grid(cellsToFill(k, 0), cellsToFill(k, 1)).Tag) Then
+                        grid(cellsToFill(k, 0), cellsToFill(k, 1)).BackColor = Me.BackColor
+                    End If
+                Next
+            Catch ex As Exception
+            End Try
+        End If
+
     End Sub
 
     Private Sub cell_MouseEnter(sender As Object, e As EventArgs)
+
         Dim cell = DirectCast(sender, Label)
         Dim cellNum As Integer = cell.Tag
 
+        justPlaced = False
         'Gets x and y coords for the mouseover-ed cell
         Dim xPos As Integer = cellNum Mod 8
         Dim yPos As Integer = (cellNum - xPos + 1) / 8
 
-        cellsToFill = selectedCells(xPos, yPos)
+        If placePhase Then
+            cellsToFill = selectedCells(xPos, yPos)
 
+            'Highlights cells
+            Try
+                For k As Integer = 0 To shipLengthToPlace - 1
+                    If cell.Tag = 0 Or Not grid(cellsToFill(k, 0), cellsToFill(k, 1)).Tag = 0 And Not shipCellIndex.Contains(grid(cellsToFill(k, 0), cellsToFill(k, 1)).Tag) Then
+                        grid(cellsToFill(k, 0), cellsToFill(k, 1)).BackColor = Color.LightBlue
+                    End If
+                Next
+            Catch ex As Exception
+            End Try
+        Else
 
-        For k As Integer = 0 To shipLengthToPlace - 1
-            If cell.Tag = 0 Or Not grid(cellsToFill(k, 0), cellsToFill(k, 1)).Tag = 0 Then
-                grid(cellsToFill(k, 0), cellsToFill(k, 1)).BackColor = Color.DarkBlue
-            End If
-        Next
-
-
+        End If
     End Sub
 
     Private Sub cell_MouseClick(sender As Object, e As MouseEventArgs)
-        If e.Button = MouseButtons.Left And placePhase Then
-            shipLengthToPlace -= 2
+        Dim cell = DirectCast(sender, Label)
 
-            If shipLengthToPlace = 1 Then
-                placePhase = False
+        If placePhase Then
+            If e.Button = MouseButtons.Left Then
+                If validPlacement And Not justPlaced Then
+                    For k As Integer = 0 To shipLengthToPlace - 1
+                        If cell.Tag = 0 Or Not grid(cellsToFill(k, 0), cellsToFill(k, 1)).Tag = 0 Then
+                            shipCellIndex.Add(grid(cellsToFill(k, 0), cellsToFill(k, 1)).Tag)
+                            grid(cellsToFill(k, 0), cellsToFill(k, 1)).BackColor = Color.DarkBlue
+                            shipCellLabels.Add(grid(cellsToFill(k, 0), cellsToFill(k, 1)))
+                        End If
+                    Next
+                    shipLengthToPlace = 3
+
+                    justPlaced = True
+                Else
+                    MessageBox.Show("Error: invalid placement")
+                End If
+
+                If shipCellIndex.Count = 11 Then
+                    placePhase = False
+                    gameInit()
+                End If
+            ElseIf e.Button = MouseButtons.Right Then
+                'Rotates ship placement indicator
+                shipRotated = Not shipRotated
             End If
-        ElseIf e.Button = MouseButtons.Right And placePhase Then
-            shipRotated = Not shipRotated
-            messagebox.show(validPlacement )
-        End If
-
-
-    End Sub
-
-    Private Sub gameForm_SpaceKeyPress(sender As Object, e As KeyPressEventArgs) Handles Me.KeyPress
-        If e.KeyChar = " " Then
-            MessageBox.Show("nice")
+        ElseIf playerTurn Then
+            playGame(cell)
         End If
     End Sub
 End Class
